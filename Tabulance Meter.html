@@ -1,0 +1,372 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Tabulance Meter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column on a phone (inputs, dial, working); two columns from 820px (inputs left, dial right). */
+:root {
+  --bg: #E8EEEB;
+  --surface: #F6F9F7;
+  --ink: #12201D;
+  --muted: #55675F;
+  --line: #C3CFC9;
+  --track: #D5DFDA;
+  --accent: #0A6B58;
+  --warn: #B8400C;
+  --coffee: #8A5632;
+  --tea: #6F8A1F;
+  --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0D1411;
+    --surface: #152019;
+    --ink: #E3EDE8;
+    --muted: #92A59C;
+    --line: #29372F;
+    --track: #223029;
+    --accent: #4FD1B0;
+    --warn: #FF8A4C;
+    --coffee: #D49A6A;
+    --tea: #A9C84A;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0D1411;
+  --surface: #152019;
+  --ink: #E3EDE8;
+  --muted: #92A59C;
+  --line: #29372F;
+  --track: #223029;
+  --accent: #4FD1B0;
+  --warn: #FF8A4C;
+  --coffee: #D49A6A;
+  --tea: #A9C84A;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 16px;
+  line-height: 1.5;
+  padding-inline: 16px;
+  padding-block: 28px 40px;
+}
+.wrap { max-width: 560px; margin-inline: auto; display: grid; gap: 28px; }
+@media (min-width: 820px) { .wrap { max-width: 980px; } }
+
+.eyebrow {
+  font-family: var(--font-data);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 8px;
+}
+h1 {
+  font-size: clamp(2rem, 8vw, 3.4rem);
+  line-height: 1.02;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  margin: 0 0 18px;
+  text-wrap: balance;
+}
+.formula {
+  font-family: var(--font-data);
+  font-size: clamp(0.95rem, 4.4vw, 1.3rem);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 14px 16px;
+  margin: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+.formula sub { font-size: 0.7em; line-height: 0; }
+
+.cols { display: grid; gap: 28px; align-items: start; }
+@media (min-width: 820px) { .cols { grid-template-columns: 1fr 1fr; gap: 40px; } }
+.cols > * { min-width: 0; }
+
+.inputs { display: grid; gap: 26px; }
+.field label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.field label small {
+  font-family: var(--font-data);
+  font-weight: 400;
+  font-size: 12px;
+  color: var(--muted);
+}
+.hint { font-size: 14px; color: var(--muted); margin: 0 0 10px; }
+.row { display: grid; grid-template-columns: 1fr 84px; gap: 14px; align-items: center; }
+input[type="number"] {
+  font-family: var(--font-data);
+  font-size: 18px;
+  width: 100%;
+  padding: 8px 10px;
+  color: var(--ink);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  text-align: right;
+}
+input[type="range"] { width: 100%; accent-color: var(--accent); height: 28px; margin: 0; }
+input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+#coffeeR { accent-color: var(--coffee); }
+#teaR { accent-color: var(--tea); }
+
+.total-caf { display: grid; gap: 8px; padding-top: 4px; }
+.total-caf .head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font-weight: 600; }
+.total-caf .head small { font-family: var(--font-data); font-weight: 400; font-size: 12px; color: var(--muted); }
+.total-caf output { font-family: var(--font-data); font-weight: 500; font-variant-numeric: tabular-nums; }
+.stack { display: flex; height: 14px; border-radius: 4px; overflow: hidden; background: var(--track); }
+.stack i { display: block; height: 100%; transition: width 0.4s cubic-bezier(.2,.8,.2,1); }
+.stack .s-coffee { background: var(--coffee); }
+.stack .s-tea { background: var(--tea); }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-family: var(--font-data); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.legend em { font-style: normal; }
+.legend b { display: inline-block; width: 10px; height: 10px; border-radius: 2px; }
+.legend .k-coffee { background: var(--coffee); }
+.legend .k-tea { background: var(--tea); }
+
+.meter { text-align: center; }
+.gauge { width: 100%; max-width: 420px; height: auto; display: block; margin-inline: auto; }
+.g-track { fill: none; stroke: var(--track); stroke-width: 14; }
+.g-fill { fill: none; stroke: var(--accent); stroke-width: 14; transition: stroke-dasharray 0.6s cubic-bezier(.2,.8,.2,1); }
+.g-tick { stroke: var(--muted); stroke-width: 1.5; }
+.g-label { fill: var(--muted); font-family: var(--font-data); font-size: 11px; text-anchor: middle; }
+.g-needle { stroke: var(--ink); stroke-width: 3; stroke-linecap: round; fill: none; }
+.g-hub { fill: var(--ink); }
+#needle { transition: transform 0.6s cubic-bezier(.2,.8,.2,1); }
+.saturated .g-fill { stroke: var(--warn); }
+
+.readout { margin-top: -6px; }
+.psi-label { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.psi {
+  font-size: clamp(3.4rem, 16vw, 5.2rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
+}
+.psi span { font-family: var(--font-data); font-size: 0.28em; font-weight: 400; color: var(--muted); letter-spacing: 0; margin-left: 6px; }
+.verdict { font-size: 1.35rem; font-weight: 600; margin: 8px 0 4px; text-wrap: balance; }
+.saturated .verdict { color: var(--warn); }
+.quip { color: var(--muted); margin: 0 auto; max-width: 40ch; text-wrap: pretty; }
+.alert { font-family: var(--font-data); font-size: 13px; color: var(--warn); margin: 10px 0 0; }
+
+.working { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 6px 16px; }
+.working h2 { font-family: var(--font-data); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); font-weight: 500; margin: 12px 0 4px; }
+.working dl { margin: 0; }
+.working .line { display: grid; grid-template-columns: 1fr auto; gap: 12px; padding-block: 9px; border-top: 1px solid var(--line); font-size: 14px; }
+.working .line:first-of-type { border-top: 0; }
+.working dt { color: var(--muted); min-width: 0; }
+.working dd { margin: 0; font-family: var(--font-data); font-variant-numeric: tabular-nums; text-align: right; }
+.working dd sup { font-size: 0.7em; line-height: 0; }
+.working .total dt, .working .total dd { color: var(--ink); font-weight: 600; }
+
+@media (prefers-reduced-motion: reduce) {
+  .g-fill, #needle, .stack i { transition: none; }
+}
+</style>
+
+<main class="wrap">
+  <header>
+    <p class="eyebrow">Law of Academic Tabulance</p>
+    <h1>How scientific are you, in open tabs?</h1>
+    <p class="formula" aria-label="Psi equals k B times T times natural log of N active plus 1">Ψ = k<sub>B</sub> · T · ln(N<sub>active</sub> + 1)</p>
+  </header>
+
+  <div class="cols">
+    <section class="inputs" aria-label="Measurements">
+      <div class="field">
+        <label for="tabsN">Open browser tabs <small>N<sub>active</sub></small></label>
+        <p class="hint">Count them all. Pinned tabs and the one playing a half-watched video included.</p>
+        <div class="row">
+          <input type="range" id="tabsR" min="0" max="300" step="1" value="23" aria-label="Open browser tabs slider">
+          <input type="number" id="tabsN" min="0" max="300" step="1" value="23" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field">
+        <label for="coffeeN">Coffee per day, cups <small>1 cup = 95 mg caffeine</small></label>
+        <p class="hint">A mug of filter coffee. An espresso shot is closer to 65 mg.</p>
+        <div class="row">
+          <input type="range" id="coffeeR" min="0" max="8" step="1" value="2" aria-label="Cups of coffee per day slider">
+          <input type="number" id="coffeeN" min="0" max="8" step="1" value="2" inputmode="numeric">
+        </div>
+      </div>
+      <div class="field">
+        <label for="teaN">Tea per day, cups <small>1 cup = 40 mg caffeine</small></label>
+        <p class="hint">Black, green or chai.</p>
+        <div class="row">
+          <input type="range" id="teaR" min="0" max="8" step="1" value="2" aria-label="Cups of tea per day slider">
+          <input type="number" id="teaN" min="0" max="8" step="1" value="2" inputmode="numeric">
+        </div>
+      </div>
+      <div class="total-caf">
+        <div class="head"><span>Total caffeine <small>T gains 1 eK per 400 mg</small></span><output id="totalMg">0 mg</output></div>
+        <div class="stack" role="img" aria-label="Coffee and tea caffeine added together"><i class="s-coffee" id="sCoffee"></i><i class="s-tea" id="sTea"></i></div>
+        <div class="legend"><span><b class="k-coffee"></b><em id="lCoffee"></em></span><span><b class="k-tea"></b><em id="lTea"></em></span></div>
+      </div>
+    </section>
+
+    <section class="meter" aria-live="polite">
+      <svg id="gauge" class="gauge" viewBox="0 0 340 200" role="img" aria-label="Dial from 0 to 100 showing the Scientific Acumen Index">
+        <path class="g-track" d="M 50 175 A 120 120 0 0 1 290 175"/>
+        <path class="g-fill" id="fill" d="M 50 175 A 120 120 0 0 1 290 175" stroke-dasharray="0 400"/>
+        <g id="ticks"></g>
+        <g transform="translate(170 175)">
+          <g id="needle" style="transform: rotate(-90deg)">
+            <line class="g-needle" x1="0" y1="0" x2="0" y2="-100"/>
+          </g>
+          <circle class="g-hub" r="7"/>
+        </g>
+      </svg>
+      <div class="readout">
+        <div class="psi-label">Scientific Acumen Index</div>
+        <div class="psi"><b id="psi" style="font-weight:800">0</b><span>Ψ / 100</span></div>
+        <p class="verdict" id="verdict"></p>
+        <p class="quip" id="quip"></p>
+        <p class="alert" id="alert" hidden></p>
+      </div>
+    </section>
+  </div>
+
+  <section class="working" aria-label="Working">
+    <h2>Working</h2>
+    <dl>
+      <div class="line"><dt>k<sub>B</sub>, Browser-Chrome constant</dt><dd>1.38×10<sup>−23</sup> RAM/sec</dd></div>
+      <div class="line"><dt>T, base + total caffeine</dt><dd id="wT"></dd></div>
+      <div class="line"><dt>ln(N<sub>active</sub> + 1)</dt><dd id="wLn"></dd></div>
+      <div class="line"><dt>Raw output, k<sub>B</sub> · T · ln(N + 1)</dt><dd id="wRaw"></dd></div>
+      <div class="line"><dt>Reference, no caffeine, 300 tabs</dt><dd id="wRef"></dd></div>
+      <div class="line total"><dt>Ψ, (raw ÷ reference)<sup>3.8</sup> × 100</dt><dd id="wPsi"></dd></div>
+    </dl>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var KB = 1.38e-23;
+  var T0 = 20; // baseline intellectual temperature in eK; every 400 mg of caffeine adds 1 eK
+  var MAXTABS = 300;
+  var P = 3.8; // calibration exponent: keeps the index at or below 15 up to 20 tabs, at any caffeine level
+  var COFFEE_MG = 95, TEA_MG = 40; // caffeine per cup
+  var MAXMG = 8 * COFFEE_MG + 8 * TEA_MG; // both sliders at their maximum
+  var REF = KB * T0 * Math.log(MAXTABS + 1); // zero caffeine, 300 tabs (the maximum) reads 100
+  var ARC = Math.PI * 120;
+
+  var tabsR = document.getElementById('tabsR'), tabsN = document.getElementById('tabsN');
+  var coffeeR = document.getElementById('coffeeR'), coffeeN = document.getElementById('coffeeN');
+  var teaR = document.getElementById('teaR'), teaN = document.getElementById('teaN');
+  var fill = document.getElementById('fill'), needle = document.getElementById('needle');
+  var gauge = document.getElementById('gauge');
+  var el = function (id) { return document.getElementById(id); };
+
+  // Dial ticks and labels
+  var ticks = document.getElementById('ticks'), NS = 'http://www.w3.org/2000/svg';
+  for (var v = 0; v <= 100; v += 10) {
+    var a = Math.PI * (1 - v / 100);
+    var big = v % 25 === 0;
+    var r1 = 130, r2 = big ? 142 : 138;
+    var ln = document.createElementNS(NS, 'line');
+    ln.setAttribute('class', 'g-tick');
+    ln.setAttribute('x1', 170 + r1 * Math.cos(a)); ln.setAttribute('y1', 175 - r1 * Math.sin(a));
+    ln.setAttribute('x2', 170 + r2 * Math.cos(a)); ln.setAttribute('y2', 175 - r2 * Math.sin(a));
+    ticks.appendChild(ln);
+  }
+  [0, 25, 50, 75, 100].forEach(function (v) {
+    var a = Math.PI * (1 - v / 100);
+    var t = document.createElementNS(NS, 'text');
+    t.setAttribute('class', 'g-label');
+    t.setAttribute('x', 170 + 156 * Math.cos(a));
+    t.setAttribute('y', 175 - 156 * Math.sin(a) + 4);
+    t.textContent = v;
+    ticks.appendChild(t);
+  });
+
+  function sci(x) {
+    if (x === 0) return '0';
+    var p = x.toExponential(2).split('e');
+    var e = parseInt(p[1], 10);
+    return p[0] + '×10<sup>' + (e < 0 ? '−' : '') + Math.abs(e) + '</sup>';
+  }
+
+  var tiers = [
+    [10, 'Dormant', 'Stable, quiet and producing no hypotheses. The browser is not worried.'],
+    [25, 'Warming up', 'A few tabs, a little caffeine. Ideas are forming slowly, like a crystal.'],
+    [45, 'Working researcher', 'Enough tabs to cite things, enough espresso to read them.'],
+    [65, 'Seriously tabulant', 'Papers, docs and a half-built plot all open at once. This is peak seminar-week energy.'],
+    [85, 'Nobel-adjacent chaos', 'Your tab bar is now a row of tiny icons. You know where everything is anyway.'],
+    [Infinity, 'Critical mass', 'The RAM is now only a spectator. Please close one tab and drink some water.']
+  ];
+
+  function clamp(x, lo, hi) { return Math.min(hi, Math.max(lo, x)); }
+
+  function update() {
+    var N = clamp(Math.round(parseFloat(tabsN.value) || 0), 0, MAXTABS);
+    var coffee = clamp(Math.round(parseFloat(coffeeN.value) || 0), 0, 8);
+    var tea = clamp(Math.round(parseFloat(teaN.value) || 0), 0, 8);
+    var coffeeMg = coffee * COFFEE_MG, teaMg = tea * TEA_MG, mg = coffeeMg + teaMg;
+    el('totalMg').textContent = mg + ' mg';
+    el('sCoffee').style.width = (100 * coffeeMg / MAXMG).toFixed(1) + '%';
+    el('sTea').style.width = (100 * teaMg / MAXMG).toFixed(1) + '%';
+    el('lCoffee').textContent = 'Coffee ' + coffeeMg + ' mg';
+    el('lTea').textContent = 'Tea ' + teaMg + ' mg';
+    var lnTerm = Math.log(N + 1);
+    var T = T0 + mg / 400;
+    var raw = KB * T * lnTerm;
+    var psi = 100 * Math.pow(raw / REF, P);
+    var shown = Math.min(100, psi);
+    var p = shown / 100;
+
+    fill.setAttribute('stroke-dasharray', (ARC * p).toFixed(1) + ' 400');
+    needle.style.transform = 'rotate(' + (-90 + p * 180).toFixed(1) + 'deg)';
+    el('psi').textContent = shown.toFixed(1);
+
+    var tier = tiers.filter(function (t) { return shown < t[0] || t[0] === Infinity; })[0];
+    if (shown >= 100) tier = tiers[tiers.length - 1];
+    var quip = tier[2];
+    if (N === 0) quip = 'ln(1) = 0. A clean browser cannot do science.';
+    else if (N === MAXTABS && mg === 0) quip = 'Zero caffeine, maximum tabs. Pure tabulance, and a perfect 100.';
+    else if (mg === 0) quip = 'No coffee or tea, so T sits at the 20 eK baseline. Tabs still carry you.';
+    el('verdict').textContent = tier[1];
+    el('quip').textContent = quip;
+    gauge.parentNode.classList.toggle('saturated', psi >= 100);
+
+    var alertEl = el('alert');
+    if (psi > 100.05) { alertEl.hidden = false; alertEl.textContent = 'Off the scale. True Ψ = ' + psi.toFixed(1); }
+    else { alertEl.hidden = true; }
+
+    el('wT').innerHTML = T0 + ' + ' + (mg / 400).toFixed(2) + ' = ' + T.toFixed(2) + ' eK';
+    el('wLn').innerHTML = 'ln(' + (N + 1) + ') = ' + lnTerm.toFixed(3);
+    el('wRaw').innerHTML = sci(raw) + ' RAM/sec';
+    el('wRef').innerHTML = sci(REF) + ' RAM/sec';
+    el('wPsi').textContent = psi.toFixed(1);
+  }
+
+  tabsR.addEventListener('input', function () { tabsN.value = tabsR.value; update(); });
+  tabsN.addEventListener('input', function () { tabsR.value = tabsN.value; update(); });
+  coffeeR.addEventListener('input', function () { coffeeN.value = coffeeR.value; update(); });
+  coffeeN.addEventListener('input', function () { coffeeR.value = coffeeN.value; update(); });
+  teaR.addEventListener('input', function () { teaN.value = teaR.value; update(); });
+  teaN.addEventListener('input', function () { teaR.value = teaN.value; update(); });
+  update();
+})();
+</script>
+
+</body></html>
