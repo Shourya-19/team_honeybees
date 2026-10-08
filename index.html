@@ -196,8 +196,8 @@ input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
         <label for="tabsN">Open browser tabs <small>N<sub>active</sub></small></label>
         <p class="hint">Count them all. Pinned tabs and the one playing a half-watched video included.</p>
         <div class="row">
-          <input type="range" id="tabsR" min="0" max="300" step="1" value="23" aria-label="Open browser tabs slider">
-          <input type="number" id="tabsN" min="0" max="300" step="1" value="23" inputmode="numeric">
+          <input type="range" id="tabsR" min="0" max="2000" step="1" value="23" aria-label="Open browser tabs slider">
+          <input type="number" id="tabsN" min="0" max="2000" step="1" value="23" inputmode="numeric">
         </div>
       </div>
       <div class="field">
@@ -252,8 +252,8 @@ input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
       <div class="line"><dt>T, base + total caffeine</dt><dd id="wT"></dd></div>
       <div class="line"><dt>ln(N<sub>active</sub> + 1)</dt><dd id="wLn"></dd></div>
       <div class="line"><dt>Raw output, k<sub>B</sub> · T · ln(N + 1)</dt><dd id="wRaw"></dd></div>
-      <div class="line"><dt>Reference, no caffeine, 300 tabs</dt><dd id="wRef"></dd></div>
-      <div class="line total"><dt>Ψ, (raw ÷ reference)<sup>3.8</sup> × 100</dt><dd id="wPsi"></dd></div>
+      <div class="line"><dt>Reference, no caffeine, 2000 tabs</dt><dd id="wRef"></dd></div>
+      <div class="line total"><dt>Ψ, (raw ÷ reference)<sup>2.45</sup> × 100</dt><dd id="wPsi"></dd></div>
     </dl>
   </section>
 
@@ -263,11 +263,11 @@ input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 (function () {
   var KB = 1.38e-23;
   var T0 = 20; // baseline intellectual temperature in eK; every 400 mg of caffeine adds 1 eK
-  var MAXTABS = 300;
-  var P = 3.8; // calibration exponent: keeps the index at or below 15 up to 20 tabs, at any caffeine level
+  var MAXTABS = 2000;
+  var P = 2.45; // calibration exponent: keeps the index at or below 15 up to 20 tabs, at any caffeine level
   var COFFEE_MG = 95, TEA_MG = 40; // caffeine per cup
   var MAXMG = 8 * COFFEE_MG + 8 * TEA_MG; // both sliders at their maximum
-  var REF = KB * T0 * Math.log(MAXTABS + 1); // zero caffeine, 300 tabs (the maximum) reads 100
+  var REF = KB * T0 * Math.log(MAXTABS + 1); // zero caffeine, 2000 tabs (the maximum) reads 100
   var ARC = Math.PI * 120;
 
   var tabsR = document.getElementById('tabsR'), tabsN = document.getElementById('tabsN');
